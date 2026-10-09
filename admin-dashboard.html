@@ -131,7 +131,9 @@ tr:last-child td{border-bottom:none}
     <div class="refresh-info">
       <span id="data-count" class="lu-badge">0 jabatan ada data</span>
       <button class="btn-refresh" onclick="loadAll()">🔄 Refresh</button>
-      <a href="dept-dashboard.html" style="padding:5px 12px;border-radius:6px;border:1px solid #3b82d4;background:#dbeafe;font-size:12px;font-weight:600;color:#1e40af;text-decoration:none">+ Input Data Jabatan</a>
+      <button class="btn-refresh" onclick="exportData()" style="background:#22a06b;color:#fff;border-color:#22a06b" title="Eksport semua data jabatan ke fail JSON">💾 Eksport Data</button>
+      <label style="padding:5px 12px;border-radius:6px;border:1px solid #f59e0b;background:#fef9c3;font-size:12px;font-weight:600;color:#854d0e;cursor:pointer" title="Import data dari fail JSON yang pernah dieksport">📂 Import Data<input type="file" accept=".json" onchange="importData(event)" style="display:none"/></label>
+      <a href="dept-dashboard (1).html" style="padding:5px 12px;border-radius:6px;border:1px solid #3b82d4;background:#dbeafe;font-size:12px;font-weight:600;color:#1e40af;text-decoration:none">+ Input Data Jabatan</a>
     </div>
   </div>
 
@@ -476,6 +478,53 @@ function switchView(name,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
   btn.classList.add('active');
+}
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────────
+function exportData(){
+  const allData = {};
+  DEPTS.forEach(d=>{
+    const dat = getDeptData(d);
+    if(dat) allData[d] = dat;
+  });
+  if(Object.keys(allData).length === 0){
+    alert('Tiada data untuk dieksport. Sila isi data jabatan dahulu.');
+    return;
+  }
+  const blob = new Blob([JSON.stringify({_exported: new Date().toISOString(), data: allData}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'psh-dashboard-data-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const json = JSON.parse(e.target.result);
+      const allData = json.data || json; // support both formats
+      let count = 0;
+      DEPTS.forEach(d=>{
+        if(allData[d]){
+          localStorage.setItem('psh_dept_'+d, JSON.stringify(allData[d]));
+          count++;
+        }
+      });
+      // Update index
+      const idx = DEPTS.filter(d => allData[d]);
+      localStorage.setItem('psh_depts_index', JSON.stringify(idx));
+      loadAll();
+      alert('✅ Berjaya import data ' + count + ' jabatan!\n\nDieksport pada: ' + (json._exported ? new Date(json._exported).toLocaleString('ms-MY') : 'Tidak diketahui'));
+    } catch(err) {
+      alert('❌ Fail tidak sah. Pastikan fail JSON yang dieksport dari sistem ini.\nError: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // Auto-refresh every 5 seconds to catch new localStorage writes

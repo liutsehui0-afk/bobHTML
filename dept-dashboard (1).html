@@ -259,6 +259,8 @@ td input:focus,td select:focus{outline:none;border-color:#1976d2}
   <!-- SAVE BAR -->
   <div class="save-bar" id="save-bar" style="display:none">
     <button class="btn btn-primary" onclick="saveAll()">💾 Simpan &amp; Hantar ke Dashboard Admin</button>
+    <button class="btn" onclick="exportDept()" style="background:#22a06b;color:#fff;border:none;" title="Eksport data jabatan ini ke fail JSON">💾 Eksport Data</button>
+    <label class="btn" style="background:#f59e0b;color:#fff;border:none;cursor:pointer;" title="Import semula data jabatan dari fail JSON">📂 Import Data<input type="file" accept=".json" onchange="importDept(event)" style="display:none"/></label>
     <a href="admin-dashboard.html" class="btn btn-primary" style="text-decoration:none;">📊 Lihat Admin Dashboard</a>
   </div>
 
@@ -507,6 +509,51 @@ function showToast(msg){
   t.textContent=msg;
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────────
+function exportDept(){
+  if(!dept){alert('Sila pilih jabatan dahulu.');return;}
+  const data = gatherData();
+  const payload = {_exported: new Date().toISOString(), data: {}};
+  payload.data[dept] = data;
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'psh-data-' + dept + '-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('✅ Data ' + dept + ' berjaya dieksport!');
+}
+
+function importDept(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const json = JSON.parse(e.target.result);
+      const allData = json.data || json;
+      // Try to load matching dept, or first dept found
+      const key = allData[dept] ? dept : Object.keys(allData)[0];
+      if(!allData[key]){
+        alert('Tiada data jabatan dalam fail ini.');
+        return;
+      }
+      localStorage.setItem('psh_dept_' + key, JSON.stringify(allData[key]));
+      // Update index
+      const idx = JSON.parse(localStorage.getItem('psh_depts_index')||'[]');
+      if(!idx.includes(key)) idx.push(key);
+      localStorage.setItem('psh_depts_index', JSON.stringify(idx));
+      // Reload UI if same dept
+      if(key === dept) loadDept();
+      showToast('✅ Data ' + key + ' berjaya diimport!');
+    } catch(err) {
+      alert('❌ Fail tidak sah.\nError: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
 }
 </script>
 </body>
