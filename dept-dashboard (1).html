@@ -111,7 +111,8 @@ td input:focus,td select:focus{outline:none;border-color:#1976d2}
     </div>
     <div class="hdr-right">
       Politeknik Kuching Sarawak<br>
-      <strong id="cur-date"></strong>
+      <strong id="cur-date"></strong><br>
+      <a href="admin-dashboard.html" style="color:#fff;font-size:11px;opacity:.85;text-decoration:underline;margin-top:4px;display:inline-block;">📊 Buka Admin Dashboard →</a>
     </div>
   </div>
 
@@ -258,6 +259,7 @@ td input:focus,td select:focus{outline:none;border-color:#1976d2}
   <!-- SAVE BAR -->
   <div class="save-bar" id="save-bar" style="display:none">
     <button class="btn btn-primary" onclick="saveAll()">💾 Simpan &amp; Hantar ke Dashboard Admin</button>
+    <a href="admin-dashboard.html" class="btn btn-primary" style="text-decoration:none;">📊 Lihat Admin Dashboard</a>
   </div>
 
 </div>
@@ -488,13 +490,16 @@ function autoSave(){
 function saveAll(){
   if(!dept){alert('Sila pilih jabatan dahulu.');return;}
   const data=gatherData();
-  localStorage.setItem('psh_dept_'+dept, JSON.stringify(data));
-  // Also update the global admin index
-  const idx = JSON.parse(localStorage.getItem('psh_depts_index')||'[]');
-  if(!idx.includes(dept)) idx.push(dept);
-  localStorage.setItem('psh_depts_index', JSON.stringify(idx));
-  document.getElementById('save-status').textContent='✓ Tersimpan – '+new Date().toLocaleTimeString('ms-MY');
-  showToast('Data '+dept+' berjaya disimpan ke Dashboard Admin!');
+  try {
+    localStorage.setItem('psh_dept_'+dept, JSON.stringify(data));
+    const idx = JSON.parse(localStorage.getItem('psh_depts_index')||'[]');
+    if(!idx.includes(dept)) idx.push(dept);
+    localStorage.setItem('psh_depts_index', JSON.stringify(idx));
+    document.getElementById('save-status').textContent='✓ Tersimpan – '+new Date().toLocaleTimeString('ms-MY');
+    showToast('✅ Data '+dept+' disimpan! Klik "Lihat Admin Dashboard" untuk semak.');
+  } catch(e) {
+    alert('❌ Gagal simpan data.\n\nPastikan kedua-dua fail dibuka dari folder yang SAMA.\nError: '+e.message);
+  }
 }
 
 function showToast(msg){

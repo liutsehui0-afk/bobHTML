@@ -248,16 +248,16 @@ const DEPT_NAMES = {
 };
 const MONTHS = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];
 const CL_ITEMS = [
-  'Senarai kursus PSH dihantar ke penyelaras',
-  'Pengesahan pensyarah/fasilitator',
-  'Pendaftaran peserta dalam DPLI/iGrad',
-  'Bahan pembelajaran & modul siap',
-  'Pengesahan tarikh pelaksanaan',
-  'Pelaksanaan kursus berjalan',
+  'Senarai kursus PSH telah disediakan dan dihantar ke penyelaras',
+  'Pengesahan pensyarah / fasilitator bagi setiap kursus',
+  'Pendaftaran peserta dalam sistem DPLI/iGrad',
+  'Penyediaan bahan pembelajaran & modul kursus',
+  'Pengesahan tarikh pelaksanaan kursus',
+  'Pelaksanaan kursus PSH (bilik kuliah / bengkel)',
   'Pemantauan kehadiran peserta',
-  'Maklum balas peserta dikumpul',
-  'Rekod kewangan dikemaskini',
-  'Laporan PSH diserahkan'
+  'Pengumpulan maklum balas peserta (borang penilaian)',
+  'Rekod kewangan kursus dikemaskini',
+  'Laporan perlaksanaan PSH diserahkan kepada penyelaras'
 ];
 
 function getDeptData(dept){
@@ -324,7 +324,7 @@ function loadAll(){
           <div><div class="dept-name">${DEPT_NAMES[d]}</div><div class="dept-code">${d}</div></div>
           <span class="badge b-gray">Tiada Data</span>
         </div>
-        <div class="no-data" style="padding:16px">Belum ada input daripada jabatan ini.<br><a href="dept-dashboard.html">Masuk Portal Jabatan →</a></div>`;
+        <div class="no-data" style="padding:16px">Belum ada input daripada jabatan ini.<br><a href="dept-dashboard (1).html">Masuk Portal Jabatan →</a></div>`;
       grid.appendChild(div);
       return;
     }
