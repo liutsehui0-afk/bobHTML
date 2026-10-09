@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Portal Input PSH – Jabatan</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#e8f0fe;color:#1f2328;padding:24px 16px 60px}
+.wrap{max-width:860px;margin:0 auto}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#1565c0 0%,#1976d2 60%,#42a5f5 100%);color:#fff;border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hdr h1{font-size:18px;font-weight:700}
+.hdr p{font-size:12px;opacity:.8;margin-top:2px}
+.hdr-right{text-align:right;font-size:12px;opacity:.85}
+
+/* JABATAN SELECT */
+.dept-bar{background:#fff;border:1px solid #90caf9;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dept-bar label{font-size:13px;font-weight:600;white-space:nowrap}
+.dept-bar select{flex:1;min-width:220px;padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;background:#f9fafb}
+.dept-bar .save-status{font-size:12px;color:#22a06b;font-weight:600;margin-left:auto}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:8px 16px;border-radius:7px;border:1px solid #90caf9;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#1565c0;transition:all .15s}
+.tab.active{background:#1565c0;color:#fff;border-color:#1565c0}
+
+/* SECTIONS */
+.section{background:#fff;border:1px solid #90caf9;border-radius:10px;padding:20px;margin-bottom:20px;display:none}
+.section.active{display:block}
+.sec-title{font-size:14px;font-weight:700;color:#1565c0;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #90caf9;display:flex;justify-content:space-between;align-items:center}
+
+/* FORM ELEMENTS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row.tri{grid-template-columns:1fr 1fr 1fr}
+.form-row.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:12px;font-weight:600;color:#57606a}
+.form-group input,.form-group select,.form-group textarea{padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;font-family:inherit;background:#fafafa;transition:border .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#1976d2;background:#fff}
+.form-group textarea{resize:vertical;min-height:70px}
+
+/* BUTTONS */
+.btn{padding:8px 18px;border-radius:7px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-primary{background:#1565c0;color:#fff}
+.btn-primary:hover{background:#0d47a1}
+.btn-danger{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+.btn-danger:hover{background:#fca5a5}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-add{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
+.btn-add:hover{background:#bfdbfe}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#e3f2fd;padding:8px 10px;text-align:left;font-weight:600;font-size:12px;color:#1565c0;border-bottom:2px solid #90caf9}
+td{padding:8px 10px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td input,td select{padding:5px 8px;border:1px solid #d1d5db;border-radius:5px;font-size:12px;width:100%;background:#fafafa}
+td input:focus,td select:focus{outline:none;border-color:#1976d2}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi-card{background:#e3f2fd;border:1px solid #90caf9;border-radius:8px;padding:12px}
+.kpi-card label{font-size:11px;font-weight:600;color:#1565c0;display:block;margin-bottom:4px}
+.kpi-card input{width:100%;padding:7px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:15px;font-weight:700;text-align:center;background:#fff}
+
+/* CHECKLIST */
+.cl-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0f1f3}
+.cl-item:last-child{border-bottom:none}
+.cl-item input[type=checkbox]{width:16px;height:16px;margin-top:3px;flex-shrink:0;cursor:pointer}
+.cl-item .cl-label{flex:1;font-size:13px}
+.cl-item .cl-status{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
+.cl-item select{padding:4px 6px;border:1px solid #d1d5db;border-radius:5px;font-size:12px;min-width:120px}
+
+/* BADGES */
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+.b-green{background:#dcfce7;color:#166534}
+.b-yellow{background:#fef9c3;color:#854d0e}
+.b-red{background:#fee2e2;color:#991b1b}
+.b-blue{background:#dbeafe;color:#1e40af}
+.b-gray{background:#f3f4f6;color:#374151}
+
+/* PROFIT */
+.profit-pos{color:#166534;font-weight:700}
+.profit-neg{color:#991b1b;font-weight:700}
+
+/* SAVE BAR */
+.save-bar{position:sticky;bottom:16px;display:flex;justify-content:flex-end;gap:10px;padding-top:12px}
+
+/* TOAST */
+#toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:#1565c0;color:#fff;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:999}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:600px){
+  .form-row{grid-template-columns:1fr}
+  .form-row.tri{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div>
+      <h1>Portal Input PSH – Jabatan</h1>
+      <p>Masukkan data perlaksanaan Program Pembelajaran Sepanjang Hayat (PSH)</p>
+    </div>
+    <div class="hdr-right">
+      Politeknik Kuching Sarawak<br>
+      <strong id="cur-date"></strong>
+    </div>
+  </div>
+
+  <!-- PILIH JABATAN -->
+  <div class="dept-bar">
+    <label for="dept-sel">Jabatan:</label>
+    <select id="dept-sel" onchange="loadDept()">
+      <option value="">-- Pilih Jabatan --</option>
+      <option value="JKA">Jabatan Kejuruteraan Awam (JKA)</option>
+      <option value="JKM">Jabatan Kejuruteraan Mekanikal (JKM)</option>
+      <option value="JKE">Jabatan Kejuruteraan Elektrik (JKE)</option>
+      <option value="JMSK">Jabatan Matematik, Sains &amp; Komputer (JMSK)</option>
+      <option value="JTMK">Jabatan Teknologi Maklumat &amp; Komunikasi (JTMK)</option>
+      <option value="JKPK">Jabatan Kejuruteraan Petrokimia (JKPK)</option>
+      <option value="JPA">Jabatan Pengajian Am (JPA)</option>
+      <option value="JP">Jabatan Perdagangan (JP)</option>
+    </select>
+    <span id="save-status" class="save-status"></span>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" id="tabs" style="display:none">
+    <button class="tab active" onclick="switchTab('kpi',this)">📊 KPI</button>
+    <button class="tab" onclick="switchTab('checklist',this)">✅ Checklist</button>
+    <button class="tab" onclick="switchTab('kursus',this)">📅 Maklumat Kursus</button>
+    <button class="tab" onclick="switchTab('kewangan',this)">💰 Kewangan</button>
+  </div>
+
+  <!-- ===== TAB 1: KPI ===== -->
+  <div class="section active" id="tab-kpi">
+    <div class="sec-title">
+      <span>📊 KPI Perlaksanaan PSH</span>
+      <span id="kpi-dept-label" class="badge b-blue"></span>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <label>Sasaran Kursus PSH</label>
+        <input type="number" id="kpi-target" min="0" placeholder="0" oninput="autoSave()"/>
+      </div>
+      <div class="kpi-card">
+        <label>Kursus Dilaksanakan</label>
+        <input type="number" id="kpi-done" min="0" placeholder="0" oninput="autoSave()"/>
+      </div>
+      <div class="kpi-card">
+        <label>Sasaran Peserta</label>
+        <input type="number" id="kpi-peserta-target" min="0" placeholder="0" oninput="autoSave()"/>
+      </div>
+      <div class="kpi-card">
+        <label>Peserta Sebenar</label>
+        <input type="number" id="kpi-peserta-actual" min="0" placeholder="0" oninput="autoSave()"/>
+      </div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <label>Sasaran Pendapatan (RM)</label>
+        <input type="number" id="kpi-rev-target" min="0" placeholder="0.00" oninput="autoSave()"/>
+      </div>
+      <div class="kpi-card">
+        <label>Pendapatan Sebenar (RM)</label>
+        <input type="number" id="kpi-rev-actual" min="0" placeholder="0.00" oninput="autoSave()"/>
+      </div>
+      <div class="kpi-card">
+        <label>% Pencapaian Kursus</label>
+        <input type="text" id="kpi-pct-kursus" readonly placeholder="Auto" style="background:#f0f1f3;color:#57606a"/>
+      </div>
+      <div class="kpi-card">
+        <label>% Pencapaian Peserta</label>
+        <input type="text" id="kpi-pct-peserta" readonly placeholder="Auto" style="background:#f0f1f3;color:#57606a"/>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Catatan / Isu Semasa</label>
+        <textarea id="kpi-notes" placeholder="Masukkan catatan atau isu yang dihadapi..." oninput="autoSave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB 2: CHECKLIST ===== -->
+  <div class="section" id="tab-checklist">
+    <div class="sec-title">
+      <span>✅ Checklist Status Perlaksanaan PSH</span>
+      <span id="cl-progress" class="badge b-blue">0/10</span>
+    </div>
+    <div id="cl-list"></div>
+  </div>
+
+  <!-- ===== TAB 3: MAKLUMAT KURSUS ===== -->
+  <div class="section" id="tab-kursus">
+    <div class="sec-title">
+      <span>📅 Maklumat Kursus PSH Mengikut Bulan</span>
+      <button class="btn btn-add btn-sm" onclick="addKursus()">+ Tambah Kursus</button>
+    </div>
+    <div class="tbl-wrap">
+      <table id="kursus-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nama Kursus</th>
+            <th>Bulan</th>
+            <th>Tarikh Mula</th>
+            <th>Tarikh Tamat</th>
+            <th>Peserta</th>
+            <th>Status</th>
+            <th>Tindakan</th>
+          </tr>
+        </thead>
+        <tbody id="kursus-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== TAB 4: KEWANGAN ===== -->
+  <div class="section" id="tab-kewangan">
+    <div class="sec-title">
+      <span>💰 Pendapatan, Perbelanjaan &amp; Keuntungan Mengikut Kursus</span>
+      <button class="btn btn-add btn-sm" onclick="addKewangan()">+ Tambah Rekod</button>
+    </div>
+    <div class="tbl-wrap">
+      <table id="kewangan-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nama Kursus</th>
+            <th>Bulan</th>
+            <th>Pendapatan (RM)</th>
+            <th>Perbelanjaan (RM)</th>
+            <th>Keuntungan (RM)</th>
+            <th>% Untung</th>
+            <th>Tindakan</th>
+          </tr>
+        </thead>
+        <tbody id="kewangan-body"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:16px;padding:12px 14px;background:#f7f8fa;border-radius:8px;border:1px solid #e5e7eb;display:flex;gap:24px;flex-wrap:wrap">
+      <div><span style="font-size:12px;color:#57606a">Jumlah Pendapatan</span><br><strong id="total-rev" style="font-size:16px;color:#22a06b">RM 0.00</strong></div>
+      <div><span style="font-size:12px;color:#57606a">Jumlah Perbelanjaan</span><br><strong id="total-exp" style="font-size:16px;color:#ef4444">RM 0.00</strong></div>
+      <div><span style="font-size:12px;color:#57606a">Jumlah Keuntungan</span><br><strong id="total-profit" style="font-size:16px">RM 0.00</strong></div>
+      <div><span style="font-size:12px;color:#57606a">% Margin Keuntungan</span><br><strong id="total-margin" style="font-size:16px">0%</strong></div>
+    </div>
+  </div>
+
+  <!-- SAVE BAR -->
+  <div class="save-bar" id="save-bar" style="display:none">
+    <button class="btn btn-primary" onclick="saveAll()">💾 Simpan &amp; Hantar ke Dashboard Admin</button>
+  </div>
+
+</div>
+<div id="toast">Data berjaya disimpan!</div>
+
+<script>
+// ─── MONTHS ───────────────────────────────────────────────────────
+const MONTHS = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];
+
+// ─── CHECKLIST ITEMS ──────────────────────────────────────────────
+const CL_ITEMS = [
+  'Senarai kursus PSH telah disediakan dan dihantar ke penyelaras',
+  'Pengesahan pensyarah / fasilitator bagi setiap kursus',
+  'Pendaftaran peserta dalam sistem DPLI/iGrad',
+  'Penyediaan bahan pembelajaran & modul kursus',
+  'Pengesahan tarikh pelaksanaan kursus',
+  'Pelaksanaan kursus PSH (bilik kuliah / bengkel)',
+  'Pemantauan kehadiran peserta',
+  'Pengumpulan maklum balas peserta (borang penilaian)',
+  'Rekod kewangan kursus dikemaskini',
+  'Laporan perlaksanaan PSH diserahkan kepada penyelaras'
+];
+
+let dept = '';
+let kursusRows = [];
+let kewanganRows = [];
+
+// ─── INIT ─────────────────────────────────────────────────────────
+document.getElementById('cur-date').textContent = new Date().toLocaleDateString('ms-MY',{day:'2-digit',month:'long',year:'numeric'});
+
+function buildChecklist(){
+  const div = document.getElementById('cl-list');
+  div.innerHTML = '';
+  CL_ITEMS.forEach((item,i)=>{
+    const d = document.createElement('div');
+    d.className = 'cl-item';
+    d.innerHTML = `
+      <input type="checkbox" id="cl${i}" onchange="updateCLProgress();autoSave()"/>
+      <span class="cl-label">${item}</span>
+      <select id="cl-status-${i}" onchange="autoSave()">
+        <option value="belum">Belum Dilaksana</option>
+        <option value="proses">Dalam Proses</option>
+        <option value="selesai">Selesai</option>
+      </select>`;
+    div.appendChild(d);
+  });
+}
+buildChecklist();
+
+function updateCLProgress(){
+  let done=0;
+  CL_ITEMS.forEach((_,i)=>{if(document.getElementById('cl'+i)?.checked)done++;});
+  document.getElementById('cl-progress').textContent=`${done}/${CL_ITEMS.length}`;
+}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────
+function switchTab(name,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── LOAD DEPT ────────────────────────────────────────────────────
+function loadDept(){
+  dept = document.getElementById('dept-sel').value;
+  if(!dept){ document.getElementById('tabs').style.display='none'; document.getElementById('save-bar').style.display='none'; return; }
+  document.getElementById('tabs').style.display='flex';
+  document.getElementById('save-bar').style.display='flex';
+  document.getElementById('kpi-dept-label').textContent = dept;
+
+  const stored = JSON.parse(localStorage.getItem('psh_dept_'+dept)||'{}');
+
+  // KPI
+  document.getElementById('kpi-target').value = stored.kpi?.target||'';
+  document.getElementById('kpi-done').value = stored.kpi?.done||'';
+  document.getElementById('kpi-peserta-target').value = stored.kpi?.peserta_target||'';
+  document.getElementById('kpi-peserta-actual').value = stored.kpi?.peserta_actual||'';
+  document.getElementById('kpi-rev-target').value = stored.kpi?.rev_target||'';
+  document.getElementById('kpi-rev-actual').value = stored.kpi?.rev_actual||'';
+  document.getElementById('kpi-notes').value = stored.kpi?.notes||'';
+  calcKPIPct();
+
+  // Checklist
+  (stored.checklist||[]).forEach((item,i)=>{
+    const cb = document.getElementById('cl'+i);
+    const sel = document.getElementById('cl-status-'+i);
+    if(cb){ cb.checked = item.checked||false; }
+    if(sel){ sel.value = item.status||'belum'; }
+  });
+  updateCLProgress();
+
+  // Kursus
+  kursusRows = stored.kursus||[];
+  renderKursus();
+
+  // Kewangan
+  kewanganRows = stored.kewangan||[];
+  renderKewangan();
+
+  document.getElementById('save-status').textContent = stored._saved ? '✓ Data tersimpan' : '';
+}
+
+// ─── AUTO CALC KPI ────────────────────────────────────────────────
+function calcKPIPct(){
+  const t = parseFloat(document.getElementById('kpi-target').value)||0;
+  const d = parseFloat(document.getElementById('kpi-done').value)||0;
+  const pt = parseFloat(document.getElementById('kpi-peserta-target').value)||0;
+  const pa = parseFloat(document.getElementById('kpi-peserta-actual').value)||0;
+  document.getElementById('kpi-pct-kursus').value = t>0 ? (d/t*100).toFixed(1)+'%' : '-';
+  document.getElementById('kpi-pct-peserta').value = pt>0 ? (pa/pt*100).toFixed(1)+'%' : '-';
+}
+['kpi-target','kpi-done','kpi-peserta-target','kpi-peserta-actual'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',calcKPIPct);
+});
+
+// ─── KURSUS TABLE ─────────────────────────────────────────────────
+function renderKursus(){
+  const tb = document.getElementById('kursus-body');
+  tb.innerHTML='';
+  kursusRows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td><input value="${r.nama||''}" onchange="kursusRows[${i}].nama=this.value;autoSave()"/></td>
+      <td><select onchange="kursusRows[${i}].bulan=this.value;autoSave()">${MONTHS.map(m=>`<option${r.bulan===m?' selected':''}>${m}</option>`).join('')}</select></td>
+      <td><input type="date" value="${r.mula||''}" onchange="kursusRows[${i}].mula=this.value;autoSave()"/></td>
+      <td><input type="date" value="${r.tamat||''}" onchange="kursusRows[${i}].tamat=this.value;autoSave()"/></td>
+      <td><input type="number" value="${r.peserta||''}" min="0" style="width:70px" onchange="kursusRows[${i}].peserta=this.value;autoSave()"/></td>
+      <td><select onchange="kursusRows[${i}].status=this.value;autoSave()">
+        <option${(r.status||'')==='Dirancang'?' selected':''}>Dirancang</option>
+        <option${(r.status||'')==='Berjalan'?' selected':''}>Berjalan</option>
+        <option${(r.status||'')==='Selesai'?' selected':''}>Selesai</option>
+        <option${(r.status||'')==='Batal'?' selected':''}>Batal</option>
+      </select></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteKursus(${i})">Padam</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function addKursus(){
+  if(!dept){alert('Sila pilih jabatan dahulu.');return;}
+  kursusRows.push({nama:'',bulan:'Jan',mula:'',tamat:'',peserta:'',status:'Dirancang'});
+  renderKursus();
+  autoSave();
+}
+function deleteKursus(i){
+  kursusRows.splice(i,1);
+  renderKursus();
+  autoSave();
+}
+
+// ─── KEWANGAN TABLE ───────────────────────────────────────────────
+function renderKewangan(){
+  const tb = document.getElementById('kewangan-body');
+  tb.innerHTML='';
+  let totRev=0,totExp=0;
+  kewanganRows.forEach((r,i)=>{
+    const rev=parseFloat(r.rev)||0;
+    const exp=parseFloat(r.exp)||0;
+    const profit=rev-exp;
+    const pct=rev>0?(profit/rev*100).toFixed(1):'-';
+    totRev+=rev; totExp+=exp;
+    const cls=profit>=0?'profit-pos':'profit-neg';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td><input value="${r.nama||''}" onchange="kewanganRows[${i}].nama=this.value;renderKewangan();autoSave()"/></td>
+      <td><select onchange="kewanganRows[${i}].bulan=this.value;autoSave()">${MONTHS.map(m=>`<option${r.bulan===m?' selected':''}>${m}</option>`).join('')}</select></td>
+      <td><input type="number" value="${r.rev||''}" min="0" step="0.01" onchange="kewanganRows[${i}].rev=this.value;renderKewangan();autoSave()"/></td>
+      <td><input type="number" value="${r.exp||''}" min="0" step="0.01" onchange="kewanganRows[${i}].exp=this.value;renderKewangan();autoSave()"/></td>
+      <td class="${cls}">RM ${profit.toFixed(2)}</td>
+      <td class="${cls}">${pct}${pct!=='-'?'%':''}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteKewangan(${i})">Padam</button></td>`;
+    tb.appendChild(tr);
+  });
+  const totProfit=totRev-totExp;
+  const totMargin=totRev>0?(totProfit/totRev*100).toFixed(1):0;
+  document.getElementById('total-rev').textContent='RM '+totRev.toFixed(2);
+  document.getElementById('total-exp').textContent='RM '+totExp.toFixed(2);
+  document.getElementById('total-profit').textContent='RM '+totProfit.toFixed(2);
+  document.getElementById('total-profit').className=totProfit>=0?'profit-pos':'profit-neg';
+  document.getElementById('total-margin').textContent=totMargin+'%';
+  document.getElementById('total-margin').className=totProfit>=0?'profit-pos':'profit-neg';
+}
+function addKewangan(){
+  if(!dept){alert('Sila pilih jabatan dahulu.');return;}
+  kewanganRows.push({nama:'',bulan:'Jan',rev:'',exp:''});
+  renderKewangan();
+  autoSave();
+}
+function deleteKewangan(i){
+  kewanganRows.splice(i,1);
+  renderKewangan();
+  autoSave();
+}
+
+// ─── SAVE ─────────────────────────────────────────────────────────
+function gatherData(){
+  const checklist = CL_ITEMS.map((_,i)=>({
+    checked: document.getElementById('cl'+i)?.checked||false,
+    status: document.getElementById('cl-status-'+i)?.value||'belum'
+  }));
+  return {
+    dept,
+    kpi:{
+      target: document.getElementById('kpi-target').value,
+      done: document.getElementById('kpi-done').value,
+      peserta_target: document.getElementById('kpi-peserta-target').value,
+      peserta_actual: document.getElementById('kpi-peserta-actual').value,
+      rev_target: document.getElementById('kpi-rev-target').value,
+      rev_actual: document.getElementById('kpi-rev-actual').value,
+      notes: document.getElementById('kpi-notes').value
+    },
+    checklist,
+    kursus: kursusRows,
+    kewangan: kewanganRows,
+    _saved: new Date().toISOString()
+  };
+}
+
+let saveTimer=null;
+function autoSave(){
+  calcKPIPct();
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveAll,1200);
+}
+
+function saveAll(){
+  if(!dept){alert('Sila pilih jabatan dahulu.');return;}
+  const data=gatherData();
+  localStorage.setItem('psh_dept_'+dept, JSON.stringify(data));
+  // Also update the global admin index
+  const idx = JSON.parse(localStorage.getItem('psh_depts_index')||'[]');
+  if(!idx.includes(dept)) idx.push(dept);
+  localStorage.setItem('psh_depts_index', JSON.stringify(idx));
+  document.getElementById('save-status').textContent='✓ Tersimpan – '+new Date().toLocaleTimeString('ms-MY');
+  showToast('Data '+dept+' berjaya disimpan ke Dashboard Admin!');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>

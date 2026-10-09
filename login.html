@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Log Masuk – Dashboard Admin PSH</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#f7f8fa;color:#1f2328;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
+
+/* CARD */
+.login-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.07)}
+
+/* HEADER BAND */
+.card-header{background:linear-gradient(135deg,#1e3a5f 0%,#15527a 100%);color:#fff;padding:28px 28px 22px;text-align:center}
+.card-header .logo-circle{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;font-weight:800;letter-spacing:-1px}
+.card-header h1{font-size:17px;font-weight:700;margin-bottom:2px}
+.card-header p{font-size:11px;opacity:.75}
+
+/* FORM BODY */
+.card-body{padding:28px}
+
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:#57606a;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.form-group .input-wrap{position:relative}
+.form-group input{width:100%;padding:10px 14px;border:1px solid #d0d7de;border-radius:8px;font-size:14px;color:#1f2328;background:#fff;outline:none;transition:border-color .2s,box-shadow .2s}
+.form-group input:focus{border-color:#3b82d4;box-shadow:0 0 0 3px rgba(59,130,212,.12)}
+.form-group input::placeholder{color:#adb5bd}
+
+/* toggle password icon */
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#57606a;font-size:15px;user-select:none;line-height:1}
+.toggle-pw:hover{color:#1f2328}
+
+/* remember row */
+.row-remember{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.remember-label{display:flex;align-items:center;gap:7px;font-size:13px;color:#57606a;cursor:pointer}
+.remember-label input[type=checkbox]{width:15px;height:15px;accent-color:#3b82d4;cursor:pointer}
+.forgot-link{font-size:12px;color:#3b82d4;text-decoration:none}
+.forgot-link:hover{text-decoration:underline}
+
+/* submit button */
+.btn-login{width:100%;padding:11px;background:#1e3a5f;color:#fff;font-size:14px;font-weight:600;border:none;border-radius:8px;cursor:pointer;transition:background .2s,transform .1s}
+.btn-login:hover{background:#15527a}
+.btn-login:active{transform:scale(.99)}
+
+/* error message */
+.msg-error{display:none;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:7px;padding:9px 13px;font-size:13px;margin-bottom:16px}
+.msg-error.show{display:block}
+
+/* FOOTER */
+.card-footer{border-top:1px solid #e5e7eb;padding:14px 28px;text-align:center;font-size:11px;color:#57606a;background:#f7f8fa}
+
+/* page footer */
+.page-footer{margin-top:20px;font-size:11px;color:#adb5bd;text-align:center}
+
+/* live dot */
+.live-dot{display:inline-block;width:7px;height:7px;background:#4ade80;border-radius:50%;margin-right:4px;animation:pulse 1.5s infinite;vertical-align:middle}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+</style>
+</head>
+<body>
+
+<div class="login-card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="logo-circle">PSH</div>
+    <h1>Dashboard Admin PSH</h1>
+    <p>Politeknik Kuching Sarawak</p>
+  </div>
+
+  <!-- Form Body -->
+  <div class="card-body">
+
+    <div class="msg-error" id="errMsg">
+      &#9888;&#65039; ID pengguna atau kata laluan tidak sah. Sila cuba semula.
+    </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)" autocomplete="off" novalidate>
+
+      <div class="form-group">
+        <label for="username">ID Pengguna</label>
+        <div class="input-wrap">
+          <input type="text" id="username" placeholder="Masukkan ID pengguna" required autocomplete="username"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Kata Laluan</label>
+        <div class="input-wrap">
+          <input type="password" id="password" placeholder="Masukkan kata laluan" required autocomplete="current-password"/>
+          <span class="toggle-pw" onclick="togglePw()" id="pwToggle" title="Tunjuk/Sembunyi">&#128065;</span>
+        </div>
+      </div>
+
+      <div class="row-remember">
+        <label class="remember-label">
+          <input type="checkbox" id="remember"/>
+          Ingat saya
+        </label>
+        <a href="#" class="forgot-link">Lupa kata laluan?</a>
+      </div>
+
+      <button type="submit" class="btn-login" id="loginBtn">Log Masuk</button>
+
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer">
+    <span class="live-dot"></span>Sistem aktif &bull; Versi 1.0.0 &bull; &copy; 2025 Politeknik Kuching
+  </div>
+
+</div>
+
+<p class="page-footer">Hak cipta terpelihara &copy; 2025 &mdash; Jabatan Teknologi Maklumat</p>
+
+<script>
+  /* Demo credentials — replace with real auth */
+  const VALID_USERS = [
+    { id: "admin",   pw: "admin123" },
+    { id: "psh2025", pw: "P@ssw0rd" }
+  ];
+
+  function handleLogin(e) {
+    e.preventDefault();
+    const uid  = document.getElementById("username").value.trim();
+    const pwd  = document.getElementById("password").value;
+    const err  = document.getElementById("errMsg");
+    const btn  = document.getElementById("loginBtn");
+
+    err.classList.remove("show");
+
+    const valid = VALID_USERS.some(u => u.id === uid && u.pw === pwd);
+
+    if (valid) {
+      btn.textContent = "Mengesahkan…";
+      btn.disabled = true;
+      setTimeout(() => {
+        window.location.href = "admin-dashboard.html";
+      }, 700);
+    } else {
+      err.classList.add("show");
+      document.getElementById("password").value = "";
+      document.getElementById("password").focus();
+    }
+  }
+
+  function togglePw() {
+    const inp = document.getElementById("password");
+    const ico = document.getElementById("pwToggle");
+    if (inp.type === "password") {
+      inp.type = "text";
+      ico.innerHTML = "&#128683;"; /* crossed-eye */
+    } else {
+      inp.type = "password";
+      ico.innerHTML = "&#128065;";
+    }
+  }
+</script>
+</body>
+</html>

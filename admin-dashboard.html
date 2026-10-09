@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dashboard Admin PSH – Politeknik Kuching</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#f7f8fa;color:#1f2328;padding:24px 16px 60px}
+.wrap{max-width:1060px;margin:0 auto}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#1e3a5f 0%,#1e3a5f 70%,#15527a 100%);color:#fff;border-radius:12px;padding:20px 26px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hdr h1{font-size:20px;font-weight:700}
+.hdr p{font-size:12px;opacity:.8;margin-top:2px}
+.hdr-right{text-align:right;font-size:12px;opacity:.9}
+.hdr-right strong{display:block;font-size:14px}
+.live-dot{display:inline-block;width:8px;height:8px;background:#4ade80;border-radius:50%;margin-right:5px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* TOP SUMMARY CARDS */
+.cards4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 14px}
+.card-t3b{border-top:3px solid #3b82d4}
+.card-t3g{border-top:3px solid #22a06b}
+.card-t3o{border-top:3px solid #f59e0b}
+.card-t3r{border-top:3px solid #ef4444}
+.card-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#57606a;margin-bottom:4px}
+.card-val{font-size:30px;font-weight:700;line-height:1.1}
+.card-sub{font-size:11px;color:#57606a;margin-top:3px}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:5px}
+.b-green{background:#dcfce7;color:#166534}
+.b-yellow{background:#fef9c3;color:#854d0e}
+.b-red{background:#fee2e2;color:#991b1b}
+.b-blue{background:#dbeafe;color:#1e40af}
+.b-gray{background:#f3f4f6;color:#374151}
+
+/* SECTION */
+.sec-wrap{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:18px 18px 14px;margin-bottom:20px}
+.sec-title{font-size:13px;font-weight:700;color:#1f2328;margin-bottom:14px;padding-bottom:9px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+
+/* DEPT GRID */
+.dept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:22px}
+.dept-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px}
+.dept-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.dept-name{font-size:12px;font-weight:700}
+.dept-code{font-size:11px;color:#57606a}
+.prog-wrap{height:6px;background:#e5e7eb;border-radius:3px;margin-bottom:10px;overflow:hidden}
+.prog-bar{height:100%;border-radius:3px;transition:width .5s ease}
+.dept-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.kpi-box{background:#f7f8fa;border-radius:6px;padding:6px 4px;text-align:center}
+.kpi-num{font-size:14px;font-weight:700}
+.kpi-lbl{font-size:10px;color:#57606a}
+
+/* BAR CHART SVG */
+.bar-svg text{font-family:-apple-system,"Segoe UI",system-ui,sans-serif}
+
+/* CHECKLIST SUMMARY TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#f7f8fa;padding:8px 10px;text-align:left;font-weight:600;color:#57606a;border-bottom:2px solid #e5e7eb;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid #f0f1f3;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+
+/* KURSUS MONTHLY */
+.month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:6px}
+.month-cell{background:#f7f8fa;border-radius:7px;padding:8px 6px;text-align:center}
+.month-cell .m-label{font-size:10px;font-weight:600;color:#57606a}
+.month-cell .m-val{font-size:18px;font-weight:700;color:#1e3a5f;margin:2px 0}
+.month-cell .m-sub{font-size:10px;color:#57606a}
+
+/* KEWANGAN TABLE */
+.rev-pos{color:#166534;font-weight:700}
+.rev-neg{color:#991b1b;font-weight:700}
+
+/* REFRESH */
+.refresh-info{font-size:11px;color:#57606a;display:flex;align-items:center;gap:6px}
+.btn-refresh{padding:5px 12px;border-radius:6px;border:1px solid #d1d5db;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#1e3a5f}
+.btn-refresh:hover{background:#f0f1f3}
+
+/* NO DATA */
+.no-data{text-align:center;padding:28px;color:#57606a;font-size:13px}
+.no-data a{color:#3b82d4;text-decoration:none;font-weight:600}
+
+/* LAST UPDATED */
+.lu-badge{font-size:10px;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:999px;padding:2px 8px;font-weight:600}
+
+/* LEGEND */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#57606a}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:18px;flex-wrap:wrap}
+.tab{padding:7px 14px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#57606a}
+.tab.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+
+.view{display:none}
+.view.active{display:block}
+
+@media(max-width:640px){
+  .cards4{grid-template-columns:1fr 1fr}
+  .dept-grid{grid-template-columns:1fr}
+  .month-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div>
+      <h1>Dashboard Admin – Perlaksanaan PSH</h1>
+      <p>Paparan Real-Time Pembelajaran Sepanjang Hayat (PSH) merentas semua jabatan</p>
+    </div>
+    <div class="hdr-right">
+      <strong>Politeknik Kuching Sarawak</strong>
+      <span class="live-dot"></span>Live dari Portal Jabatan<br>
+      <span id="last-refresh">–</span>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="tabs">
+      <button class="tab active" onclick="switchView('overview',this)">🗂️ Semua Jabatan</button>
+      <button class="tab" onclick="switchView('kursus',this)">📅 Kursus &amp; Bulan</button>
+      <button class="tab" onclick="switchView('kewangan',this)">💰 Kewangan</button>
+      <button class="tab" onclick="switchView('checklist',this)">✅ Checklist</button>
+    </div>
+    <div class="refresh-info">
+      <span id="data-count" class="lu-badge">0 jabatan ada data</span>
+      <button class="btn-refresh" onclick="loadAll()">🔄 Refresh</button>
+      <a href="dept-dashboard.html" style="padding:5px 12px;border-radius:6px;border:1px solid #3b82d4;background:#dbeafe;font-size:12px;font-weight:600;color:#1e40af;text-decoration:none">+ Input Data Jabatan</a>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="cards4">
+    <div class="card card-t3b">
+      <div class="card-label">Jumlah Kursus PSH</div>
+      <div class="card-val" id="s-total-kursus">–</div>
+      <div class="card-sub">Merentas semua jabatan</div>
+      <span class="badge b-blue" id="s-dept-count">–</span>
+    </div>
+    <div class="card card-t3g">
+      <div class="card-label">Kursus Selesai</div>
+      <div class="card-val" id="s-selesai">–</div>
+      <div class="card-sub" id="s-selesai-pct">0% pencapaian</div>
+      <span class="badge b-green">Selesai</span>
+    </div>
+    <div class="card card-t3o">
+      <div class="card-label">Jumlah Pendapatan</div>
+      <div class="card-val" id="s-revenue">–</div>
+      <div class="card-sub" id="s-margin">Margin: 0%</div>
+      <span class="badge b-yellow">Kewangan</span>
+    </div>
+    <div class="card card-t3r">
+      <div class="card-label">Jumlah Peserta</div>
+      <div class="card-val" id="s-peserta">–</div>
+      <div class="card-sub" id="s-peserta-pct">vs sasaran</div>
+      <span class="badge b-blue">PSH</span>
+    </div>
+  </div>
+
+  <!-- ── VIEW 1: OVERVIEW ── -->
+  <div class="view active" id="view-overview">
+    <div class="sec-title" style="margin-bottom:10px">📊 Status KPI &amp; Perlaksanaan Mengikut Jabatan</div>
+    <div class="legend">
+      <span class="leg-item"><span class="leg-dot" style="background:#22a06b"></span>Selesai</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#3b82d4"></span>Berjalan</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#fca5a5;border:1px solid #f87171"></span>Belum</span>
+    </div>
+    <div class="dept-grid" id="dept-grid"></div>
+  </div>
+
+  <!-- ── VIEW 2: KURSUS ── -->
+  <div class="view" id="view-kursus">
+    <div class="sec-wrap">
+      <div class="sec-title">📅 Bilangan Kursus PSH Mengikut Bulan (Semua Jabatan)</div>
+      <div class="month-grid" id="month-grid-1"></div>
+      <div class="month-grid" id="month-grid-2"></div>
+    </div>
+    <div class="sec-wrap">
+      <div class="sec-title">📋 Senarai Semua Kursus PSH</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Jabatan</th><th>Nama Kursus</th><th>Bulan</th><th>Tarikh Mula</th><th>Tarikh Tamat</th><th>Peserta</th><th>Status</th></tr></thead>
+          <tbody id="all-kursus-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── VIEW 3: KEWANGAN ── -->
+  <div class="view" id="view-kewangan">
+    <div class="sec-wrap">
+      <div class="sec-title">💰 Ringkasan Kewangan PSH Mengikut Jabatan</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Jabatan</th><th>Pendapatan (RM)</th><th>Perbelanjaan (RM)</th><th>Keuntungan (RM)</th><th>% Margin</th><th>Bil Kursus</th></tr></thead>
+          <tbody id="fin-summary-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="sec-wrap" style="margin-top:0">
+      <div class="sec-title">📋 Butiran Kewangan Semua Jabatan</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Jabatan</th><th>Kursus</th><th>Bulan</th><th>Pendapatan (RM)</th><th>Perbelanjaan (RM)</th><th>Keuntungan (RM)</th><th>% Untung</th></tr></thead>
+          <tbody id="all-fin-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── VIEW 4: CHECKLIST ── -->
+  <div class="view" id="view-checklist">
+    <div class="sec-wrap">
+      <div class="sec-title">✅ Status Senarai Semak PSH Mengikut Jabatan</div>
+      <div style="overflow-x:auto">
+        <table id="cl-table">
+          <thead>
+            <tr>
+              <th>Senarai Semak</th>
+              <th>JKA</th><th>JKM</th><th>JKE</th><th>JMSK</th><th>JTMK</th><th>JKPK</th><th>JPA</th><th>JP</th>
+            </tr>
+          </thead>
+          <tbody id="cl-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const DEPTS = ['JKA','JKM','JKE','JMSK','JTMK','JKPK','JPA','JP'];
+const DEPT_NAMES = {
+  JKA:'Jabatan Kejuruteraan Awam',
+  JKM:'Jabatan Kejuruteraan Mekanikal',
+  JKE:'Jabatan Kejuruteraan Elektrik',
+  JMSK:'Jabatan Matematik, Sains & Komputer',
+  JTMK:'Jabatan Teknologi Maklumat & Komunikasi',
+  JKPK:'Jabatan Kejuruteraan Petrokimia',
+  JPA:'Jabatan Pengajian Am',
+  JP:'Jabatan Perdagangan'
+};
+const MONTHS = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];
+const CL_ITEMS = [
+  'Senarai kursus PSH dihantar ke penyelaras',
+  'Pengesahan pensyarah/fasilitator',
+  'Pendaftaran peserta dalam DPLI/iGrad',
+  'Bahan pembelajaran & modul siap',
+  'Pengesahan tarikh pelaksanaan',
+  'Pelaksanaan kursus berjalan',
+  'Pemantauan kehadiran peserta',
+  'Maklum balas peserta dikumpul',
+  'Rekod kewangan dikemaskini',
+  'Laporan PSH diserahkan'
+];
+
+function getDeptData(dept){
+  return JSON.parse(localStorage.getItem('psh_dept_'+dept)||'null');
+}
+
+function fmtRM(v){return 'RM '+(parseFloat(v)||0).toFixed(2);}
+function pct(a,b){return b>0?((a/b)*100).toFixed(1)+'%':'–';}
+
+function statusBadge(s){
+  const map={Selesai:'b-green',Berjalan:'b-blue',Dirancang:'b-yellow',Batal:'b-red',selesai:'b-green',proses:'b-yellow',belum:'b-gray'};
+  const lbl={Selesai:'Selesai',Berjalan:'Berjalan',Dirancang:'Dirancang',Batal:'Batal',selesai:'Selesai',proses:'Proses',belum:'Belum'};
+  return `<span class="badge ${map[s]||'b-gray'}">${lbl[s]||s}</span>`;
+}
+
+function loadAll(){
+  const now = new Date().toLocaleTimeString('ms-MY');
+  document.getElementById('last-refresh').textContent = 'Dikemaskini: '+now;
+
+  let allData = {};
+  let activeDepts = 0;
+  DEPTS.forEach(d=>{
+    const dat = getDeptData(d);
+    if(dat){ allData[d]=dat; activeDepts++; }
+  });
+
+  document.getElementById('data-count').textContent = activeDepts+' jabatan ada data';
+
+  // ── GLOBAL SUMMARY ──────────────────────────────────────────────
+  let totKursus=0, totSelesai=0, totRev=0, totExp=0, totPeserta=0, totPesertaTarget=0;
+  DEPTS.forEach(d=>{
+    const dat=allData[d];
+    if(!dat) return;
+    (dat.kursus||[]).forEach(k=>{
+      totKursus++;
+      if(k.status==='Selesai') totSelesai++;
+      totPeserta+=parseInt(k.peserta)||0;
+    });
+    (dat.kewangan||[]).forEach(k=>{totRev+=parseFloat(k.rev)||0;totExp+=parseFloat(k.exp)||0;});
+    totPesertaTarget+=parseInt(dat.kpi?.peserta_target)||0;
+  });
+  const totProfit=totRev-totExp;
+  const totMargin=totRev>0?(totProfit/totRev*100).toFixed(1):0;
+
+  document.getElementById('s-total-kursus').textContent=totKursus||'–';
+  document.getElementById('s-dept-count').textContent=activeDepts+'/8 jabatan';
+  document.getElementById('s-selesai').textContent=totSelesai||'–';
+  document.getElementById('s-selesai-pct').textContent=(totKursus>0?(totSelesai/totKursus*100).toFixed(1):0)+'% pencapaian';
+  document.getElementById('s-revenue').textContent=totRev>0?'RM '+formatNum(totRev):'–';
+  document.getElementById('s-margin').textContent='Margin: '+totMargin+'%';
+  document.getElementById('s-peserta').textContent=totPeserta||'–';
+  document.getElementById('s-peserta-pct').textContent='Sasaran: '+totPesertaTarget;
+
+  // ── VIEW 1: DEPT GRID ──────────────────────────────────────────
+  const grid = document.getElementById('dept-grid');
+  grid.innerHTML='';
+  DEPTS.forEach(d=>{
+    const dat=allData[d];
+    const div=document.createElement('div');
+    div.className='dept-card';
+    if(!dat){
+      div.innerHTML=`
+        <div class="dept-header">
+          <div><div class="dept-name">${DEPT_NAMES[d]}</div><div class="dept-code">${d}</div></div>
+          <span class="badge b-gray">Tiada Data</span>
+        </div>
+        <div class="no-data" style="padding:16px">Belum ada input daripada jabatan ini.<br><a href="dept-dashboard.html">Masuk Portal Jabatan →</a></div>`;
+      grid.appendChild(div);
+      return;
+    }
+    const kur=dat.kursus||[];
+    const selesai=kur.filter(k=>k.status==='Selesai').length;
+    const berjalan=kur.filter(k=>k.status==='Berjalan').length;
+    const belum=kur.filter(k=>k.status==='Dirancang'||k.status==='').length;
+    const total=kur.length;
+    const pctVal=total>0?Math.round(selesai/total*100):0;
+    const barColor=pctVal>=80?'#22a06b':pctVal>=50?'#f59e0b':'#ef4444';
+    const badgeCls=pctVal>=80?'b-green':pctVal>=50?'b-yellow':'b-red';
+    const kpiDone=parseInt(dat.kpi?.done)||0;
+    const kpiTarget=parseInt(dat.kpi?.target)||0;
+    const pActual=parseInt(dat.kpi?.peserta_actual)||0;
+    const pTarget=parseInt(dat.kpi?.peserta_target)||0;
+    let depRev=0,depExp=0;
+    (dat.kewangan||[]).forEach(k=>{depRev+=parseFloat(k.rev)||0;depExp+=parseFloat(k.exp)||0;});
+    const depProfit=depRev-depExp;
+    const saved=dat._saved?new Date(dat._saved).toLocaleString('ms-MY',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'–';
+
+    // Mini bar chart
+    const maxBar=Math.max(selesai,berjalan,belum,1);
+    const bh=36,bw=50;
+    const h1=Math.max(4,Math.round(selesai/maxBar*bh));
+    const h2=Math.max(4,Math.round(berjalan/maxBar*bh));
+    const h3=Math.max(4,Math.round(belum/maxBar*bh));
+
+    div.innerHTML=`
+      <div class="dept-header">
+        <div><div class="dept-name">${DEPT_NAMES[d]}</div><div class="dept-code">${d}</div></div>
+        <span class="badge ${badgeCls}">${pctVal}%</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-bar" style="width:${pctVal}%;background:${barColor}"></div></div>
+      <div style="display:flex;gap:16px;align-items:flex-end;margin:6px 0 8px">
+        <svg width="180" height="${bh+22}" viewBox="0 ${bh+22-60} 180 60" class="bar-svg">
+          <rect x="20" y="${bh-h1}" width="${bw}" height="${h1}" fill="#22a06b" rx="3"/>
+          <text x="45" y="${bh+12}" font-size="9" fill="#57606a" text-anchor="middle">Selesai (${selesai})</text>
+          <rect x="80" y="${bh-h2}" width="${bw}" height="${h2}" fill="#3b82d4" rx="3"/>
+          <text x="105" y="${bh+12}" font-size="9" fill="#57606a" text-anchor="middle">Berjalan (${berjalan})</text>
+          <rect x="140" y="${bh-h3}" width="${bw}" height="${h3}" fill="#fca5a5" rx="3"/>
+          <text x="165" y="${bh+12}" font-size="9" fill="#57606a" text-anchor="middle">Belum (${belum})</text>
+        </svg>
+      </div>
+      <div class="dept-kpi">
+        <div class="kpi-box"><div class="kpi-num" style="color:#1e3a5f">${kpiDone}/${kpiTarget}</div><div class="kpi-lbl">Kursus KPI</div></div>
+        <div class="kpi-box"><div class="kpi-num" style="color:#1e3a5f">${pActual}/${pTarget}</div><div class="kpi-lbl">Peserta</div></div>
+        <div class="kpi-box"><div class="kpi-num ${depProfit>=0?'rev-pos':'rev-neg'}" style="font-size:12px">RM ${formatNum(depProfit)}</div><div class="kpi-lbl">Keuntungan</div></div>
+        <div class="kpi-box"><div class="kpi-num" style="font-size:10px;color:#57606a">${saved}</div><div class="kpi-lbl">Dikemaskini</div></div>
+      </div>`;
+    grid.appendChild(div);
+  });
+
+  // ── VIEW 2: KURSUS ─────────────────────────────────────────────
+  const monthCount={};
+  MONTHS.forEach(m=>monthCount[m]=0);
+  const allKursus=[];
+  DEPTS.forEach(d=>{
+    const dat=allData[d]; if(!dat) return;
+    (dat.kursus||[]).forEach(k=>{
+      if(k.bulan&&monthCount[k.bulan]!==undefined) monthCount[k.bulan]++;
+      allKursus.push({dept:d,...k});
+    });
+  });
+  ['month-grid-1','month-grid-2'].forEach((id,idx)=>{
+    const g=document.getElementById(id);
+    g.innerHTML='';
+    MONTHS.slice(idx*6,(idx+1)*6).forEach(m=>{
+      const cnt=monthCount[m]||0;
+      const cell=document.createElement('div');
+      cell.className='month-cell';
+      cell.innerHTML=`<div class="m-label">${m}</div><div class="m-val">${cnt}</div><div class="m-sub">kursus</div>`;
+      g.appendChild(cell);
+    });
+  });
+  const kb=document.getElementById('all-kursus-body');
+  kb.innerHTML='';
+  if(allKursus.length===0){
+    kb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#57606a">Tiada data kursus lagi. <a href="dept-dashboard.html" style="color:#3b82d4">Input data jabatan →</a></td></tr>';
+  } else {
+    allKursus.forEach(k=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><span class="badge b-blue">${k.dept}</span></td><td>${k.nama||'–'}</td><td>${k.bulan||'–'}</td><td>${k.mula||'–'}</td><td>${k.tamat||'–'}</td><td>${k.peserta||'–'}</td><td>${statusBadge(k.status||'Dirancang')}</td>`;
+      kb.appendChild(tr);
+    });
+  }
+
+  // ── VIEW 3: KEWANGAN ───────────────────────────────────────────
+  const fsb=document.getElementById('fin-summary-body');
+  fsb.innerHTML='';
+  const afb=document.getElementById('all-fin-body');
+  afb.innerHTML='';
+  let hasFinData=false;
+  DEPTS.forEach(d=>{
+    const dat=allData[d]; if(!dat) return;
+    const rows=dat.kewangan||[]; if(!rows.length) return;
+    hasFinData=true;
+    let dRev=0,dExp=0;
+    rows.forEach(k=>{
+      const rev=parseFloat(k.rev)||0;
+      const exp=parseFloat(k.exp)||0;
+      const prof=rev-exp;
+      const m=rev>0?(prof/rev*100).toFixed(1):'-';
+      dRev+=rev; dExp+=exp;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><span class="badge b-blue">${d}</span></td><td>${k.nama||'–'}</td><td>${k.bulan||'–'}</td><td class="rev-pos">${fmtRM(rev)}</td><td style="color:#ef4444">RM ${exp.toFixed(2)}</td><td class="${prof>=0?'rev-pos':'rev-neg'}">RM ${prof.toFixed(2)}</td><td class="${prof>=0?'rev-pos':'rev-neg'}">${m}${m!=='-'?'%':''}</td>`;
+      afb.appendChild(tr);
+    });
+    const dProfit=dRev-dExp;
+    const dMargin=dRev>0?(dProfit/dRev*100).toFixed(1):'-';
+    const tr2=document.createElement('tr');
+    tr2.innerHTML=`<td><strong>${d}</strong></td><td class="rev-pos"><strong>${fmtRM(dRev)}</strong></td><td style="color:#ef4444"><strong>RM ${dExp.toFixed(2)}</strong></td><td class="${dProfit>=0?'rev-pos':'rev-neg'}"><strong>RM ${dProfit.toFixed(2)}</strong></td><td class="${dProfit>=0?'rev-pos':'rev-neg'}"><strong>${dMargin}${dMargin!=='-'?'%':''}</strong></td><td>${rows.length} kursus</td>`;
+    fsb.appendChild(tr2);
+  });
+  if(!hasFinData){
+    fsb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#57606a">Tiada data kewangan lagi.</td></tr>';
+    afb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#57606a">Tiada data kewangan lagi.</td></tr>';
+  }
+
+  // ── VIEW 4: CHECKLIST ──────────────────────────────────────────
+  const clb=document.getElementById('cl-tbody');
+  clb.innerHTML='';
+  CL_ITEMS.forEach((item,i)=>{
+    const tr=document.createElement('tr');
+    let cells=`<td style="font-size:12px;max-width:220px">${i+1}. ${item}</td>`;
+    DEPTS.forEach(d=>{
+      const dat=allData[d];
+      const cl=dat?.checklist?.[i];
+      if(!dat){ cells+=`<td style="text-align:center"><span class="badge b-gray">–</span></td>`; return; }
+      const s=cl?.status||'belum';
+      const checked=cl?.checked;
+      const map={selesai:'b-green',proses:'b-yellow',belum:'b-red'};
+      const lbl={selesai:'✓',proses:'→',belum:'○'};
+      cells+=`<td style="text-align:center"><span class="badge ${map[s]||'b-gray'}" title="${d}: ${s}">${lbl[s]||'–'}</span></td>`;
+    });
+    tr.innerHTML=cells;
+    clb.appendChild(tr);
+  });
+}
+
+function formatNum(n){
+  const v=parseFloat(n)||0;
+  if(v>=1000000) return (v/1000000).toFixed(1)+'J';
+  if(v>=1000) return (v/1000).toFixed(1)+'k';
+  return v.toFixed(2);
+}
+
+function switchView(name,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Auto-refresh every 5 seconds to catch new localStorage writes
+loadAll();
+setInterval(loadAll, 5000);
+</script>
+</body>
+</html>
